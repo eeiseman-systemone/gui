@@ -9,7 +9,7 @@ import wx
 import requests
 
 # Using a custom CA cert and API key
-def elasticsearch(label):
+def elasticsearch_health(label):
   # Set the URL
   url = 'https://mineral.systemone.app:9200/_cluster/health'
   
@@ -24,16 +24,19 @@ def elasticsearch(label):
   response = requests.get(url, verify=cacert, headers=headers)
   
   # Print the raw, plain text of the response
-  label.SetLabel(response.json()['status'])
+
+  status = response.json()['status']
+  if status == 'green':
+    label.SetForegroundColour("green")
+  else:
+    label.SetForegroundColour("red")
+  label.SetLabel(status)
+  
   return
   
   # Since we're getting JSON back, there is a method format the reponse as
   # a JSON object
   # print(response.json())
-
-def on_click(label):
-  label.SetLabel("Changed")
-  return 
 
 # Program entry point
 def main():
@@ -48,10 +51,8 @@ def main():
   label01 = wx.StaticText(parent=panel01)
   label01.SetLabel("Start")
   
-  
-
   button01 = wx.Button(parent=panel01, label="Button01")
-  button01.Bind(wx.EVT_BUTTON, lambda dummy: elasticsearch(label01))
+  button01.Bind(wx.EVT_BUTTON, lambda dummy: elasticsearch_health(label01))
   grid_sizer.Add(button01)
   grid_sizer.Add(label01)
 
